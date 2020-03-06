@@ -46,11 +46,12 @@ void DrawLine(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
         int x = xs;
         int y = ys;
         int diff = ye > ys ? 1 : -1;
-        int d = dy * (2 * x + 2) - dx * (2 * y + diff) + 2 * (dx * ys - dy * xs);
+        int d = 2 * dy - diff * dx;
 
+        int dir = -dx * diff;
         while (x < xe) {
             ++x;
-            if (d * -dx * diff < 0) y += diff, d-=2*dx*diff;
+            if (d * dir < 0) y += diff, d -= 2 * dx * diff;
             d += 2 * dy;
             SetPixel(hdc, x, y, color);
         }
@@ -62,10 +63,12 @@ void DrawLine(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
         int x = xs;
         int y = ys;
         int diff = xe > xs ? 1 : -1;
-        int d = dy * (2 * x + diff) - dx * (2 * y + 2) + 2 * (dx * ys - dy * xs);
+        int d = dy * diff - 2 * dx;
+
+        int dir = dy * diff;
 
         while (y < ye) {
-            if (d * dy * diff < 0) x += diff, d+=2*dy*diff;
+            if (d * dir < 0) x += diff, d += 2 * dy * diff;
             ++y;
             d -= 2 * dx;
             SetPixel(hdc, x, y, color);
