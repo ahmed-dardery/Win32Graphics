@@ -57,9 +57,10 @@ namespace MenuHandler {
     }
 
     int colorsIDs[] = { ID_COLORS_RED, ID_COLORS_GREEN, ID_COLORS_BLUE };
+    int circleIDs[] = { ID_OPTIONS_NOCIRCLE, ID_OPTIONS_DRAWCIRCLE, ID_OPTIONS_FILLCIRCLE };
     MainMenu::MainMenu(HMENU menu) :
         DrawLine(menu, ID_OPTIONS_DRAWLINE),
-        DrawCircle(menu, ID_OPTIONS_DRAWCIRCLE),
+        DrawCircle(menu, circleIDs, sizeof circleIDs / sizeof circleIDs[0]),
         Colors(menu, colorsIDs, sizeof colorsIDs / sizeof colorsIDs[0]),
         TrailDraw(menu, ID_OPTIONS_TRAILDRAW)
     {    }
@@ -82,8 +83,10 @@ namespace MenuHandler {
                 menu.DrawLine.toggleChecked();
                 return;
             }
-            case ID_OPTIONS_DRAWCIRCLE: {
-                menu.DrawCircle.toggleChecked();
+            case ID_OPTIONS_NOCIRCLE:
+            case ID_OPTIONS_DRAWCIRCLE:
+            case ID_OPTIONS_FILLCIRCLE: {
+                menu.DrawCircle.setChecked(LOWORD(wParam));
                 return;
             }
             case ID_OPTIONS_TRAILDRAW: {

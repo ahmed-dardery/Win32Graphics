@@ -54,7 +54,10 @@ IDR_MENU1 MENU
 BEGIN
     POPUP "Options"
     BEGIN
+        MENUITEM "No Circle",                   ID_OPTIONS_NOCIRCLE
         MENUITEM "Draw Circle",                 ID_OPTIONS_DRAWCIRCLE, CHECKED
+        MENUITEM "Fill Circle",                 ID_OPTIONS_FILLCIRCLE
+        MENUITEM SEPARATOR
         MENUITEM "Draw Line",                   ID_OPTIONS_DRAWLINE, CHECKED
         MENUITEM SEPARATOR
         MENUITEM "Trail Draw",                  ID_OPTIONS_TRAILDRAW

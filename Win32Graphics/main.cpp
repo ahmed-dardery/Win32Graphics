@@ -92,9 +92,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
             if (MenuHandler::Menu().DrawLine.isChecked())
                 DrawLine(hdc, xst, yst, xen, yen, colors[coloridx]);
 
-            if (MenuHandler::Menu().DrawCircle.isChecked()) {
+            int circleType = MenuHandler::Menu().DrawCircle.getCheckedIndex();
+            if (circleType == 1) {
                 int r = (xst - xen) * (xst - xen) + (yst - yen) * (yst - yen);
                 DrawCircle(hdc, xst, yst, ROUND(sqrt(r)), colors[coloridx]);
+            }else if (circleType == 2){
+                int r = (xst - xen) * (xst - xen) + (yst - yen) * (yst - yen);
+                FillCircle(hdc, xst, yst, ROUND(sqrt(r)), colors[coloridx]);
             }
                 
         }    

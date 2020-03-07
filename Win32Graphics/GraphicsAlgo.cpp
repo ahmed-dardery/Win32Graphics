@@ -36,6 +36,40 @@ void DrawCircle(HDC hdc, int xc, int yc, int R, COLORREF color) {
     }
 }
 
+void FillCircle(HDC hdc, int xc, int yc, int R, COLORREF color) {
+    const double dtheta = 1.0 / R;
+    const double sin_dtheta = sin(dtheta);
+    const double cos_dtheta = cos(dtheta);
+    const double M_PI = acos(-1.0);
+
+    const auto SetMultiPixel = [hdc, xc, yc, color](int x, int y) {
+        DrawLine(hdc, xc, yc, xc + x, yc + y, color);
+        DrawLine(hdc, xc, yc, xc - x, yc + y, color);
+        DrawLine(hdc, xc, yc, xc + x, yc - y, color);
+        DrawLine(hdc, xc, yc, xc - x, yc - y, color);
+
+        DrawLine(hdc, xc, yc, xc + y, yc + x, color);
+        DrawLine(hdc, xc, yc, xc - y, yc + x, color);
+        DrawLine(hdc, xc, yc, xc + y, yc - x, color);
+        DrawLine(hdc, xc, yc, xc - y, yc - x, color);
+    };
+
+    double x = R;
+    double y = 0;
+    SetMultiPixel(x, y);
+
+    while (x > y)
+    {
+        double xnew = x * cos_dtheta - y * sin_dtheta;
+        double ynew = x * sin_dtheta + y * cos_dtheta;
+
+        SetMultiPixel(ROUND(x), ROUND(y));
+
+        x = xnew;
+        y = ynew;
+    }
+}
+
 void DrawLine(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
     int dx = xe - xs;
     int dy = ye - ys;
