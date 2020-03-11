@@ -3,13 +3,15 @@
 #include <windowsx.h>
 #include "GraphicsAlgo.h"
 #include "MenuHandler.h"
+#include "Painter.h"
 
-using namespace std;
+Painter &painter = Painter::getInstance();
+bool isClicked;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-int main() {
-    return WinMain(GetModuleHandle(NULL), NULL, NULL, 1);
+int main(int argc, char* argv[]){
+    return WinMain(GetModuleHandle(NULL), NULL, argv[0], 1);
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow) {
@@ -22,7 +24,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow
     wc.lpfnWndProc = WndProc;     //pointer to windows procedure function
     wc.hInstance = hInstance;    //handle to instance
     wc.lpszClassName = CLASS_NAME;  //pointer to string class name
-    wc.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
+    wc.hbrBackground = NULL;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.lpszMenuName = MenuHandler::getMenuName();
     if (!RegisterClass(&wc))
@@ -64,14 +66,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow
 
     return 0;
 }
-
-int xst, yst, xen, yen;
-bool lineSet = 0;
-bool isClicked = 0;
-int coloridx;
-
-COLORREF colors[] = { RGB(255,0,0),RGB(0,255,0),RGB(0,0,255),RGB(255,255,0),RGB(255,0,255),RGB(0,255,255),RGB(0,0,0) };
-const int colorn = sizeof colors / sizeof colors[0];
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
     case WM_DESTROY: {
@@ -79,48 +73,64 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         return 0;
     }
     case WM_COMMAND: {
-        MenuHandler::performMenuAction(hwnd, wParam);
+        MenuHandler::Action ac = MenuHandler::performMenuAction(hwnd, wParam);
+        if (ac == MenuHandler::Action::CLEAR_SCREEN) {
+            painter.lineSet = 0;
+            InvalidateRect(hwnd, NULL, true);
+        }
         return 0;
     }
     case WM_PAINT: {
+        bool doubleBuffer = MenuHandler::Menu().DoubleBuffer.isChecked();
+        HDC hdc = nullptr, Orghdc = nullptr;
         PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hwnd, &ps);
+        int win_width = 0, win_height = 0; 
+        HBITMAP Membitmap = nullptr;
 
-        if (lineSet) {
-            coloridx = MenuHandler::Menu().Colors.getCheckedIndex();
+        if (doubleBuffer) {
+            RECT Client_Rect;
+            GetClientRect(hwnd, &Client_Rect);
+            win_width = Client_Rect.right - Client_Rect.left;
+            win_height = Client_Rect.bottom + Client_Rect.left;
+            Orghdc = BeginPaint(hwnd, &ps);
+            hdc = CreateCompatibleDC(Orghdc);
+            Membitmap = CreateCompatibleBitmap(Orghdc, win_width, win_height);
+            SelectObject(hdc, Membitmap);
+        }
+        else {
+            hdc = BeginPaint(hwnd, &ps);
+        }
+      
+        painter.ClearAll(ps, hdc);
+        painter.PaintProcedure(hdc);
 
-            if (MenuHandler::Menu().DrawLine.isChecked())
-                DrawLine(hdc, xst, yst, xen, yen, colors[coloridx]);
+        if (doubleBuffer) {
 
-            int circleType = MenuHandler::Menu().DrawCircle.getCheckedIndex();
-            if (circleType == 1) {
-                int r = (xst - xen) * (xst - xen) + (yst - yen) * (yst - yen);
-                DrawCircle(hdc, xst, yst, ROUND(sqrt(r)), colors[coloridx]);
-            }else if (circleType == 2){
-                int r = (xst - xen) * (xst - xen) + (yst - yen) * (yst - yen);
-                FillCircle(hdc, xst, yst, ROUND(sqrt(r)), colors[coloridx]);
-            }
-                
-        }    
+            BitBlt(Orghdc, 0, 0, win_width, win_height, hdc, 0, 0, SRCCOPY);
+            DeleteObject(Membitmap);
+            DeleteDC(Orghdc);
+        }
 
+        DeleteDC(hdc);
         EndPaint(hwnd, &ps);
+
         return 0;
     }
     case WM_MOUSEMOVE: {
         if (isClicked) {
-            xen = LOWORD(lParam);
-            yen = HIWORD(lParam);
-            lineSet = 1;
-            InvalidateRect(hwnd, NULL, !MenuHandler::Menu().TrailDraw.isChecked());
+            painter.xen = LOWORD(lParam);
+            painter.yen = HIWORD(lParam);
+            painter.lineSet = 1;
+            InvalidateRect(hwnd, NULL, true);
         }
         return 0;
     }
     case WM_LBUTTONDOWN: {
         isClicked = 1;
-        xen = xst = LOWORD(lParam);
-        yen = yst = HIWORD(lParam);
-        lineSet = 1;
-        InvalidateRect(hwnd, NULL, !MenuHandler::Menu().TrailDraw.isChecked());
+        painter.xen = painter.xst = LOWORD(lParam);
+        painter.yen = painter.yst = HIWORD(lParam);
+        painter.lineSet = 1;
+        InvalidateRect(hwnd, NULL, true);
         return 0;
     }
     case WM_LBUTTONUP: {
@@ -128,7 +138,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         return 0;
     }
     case WM_RBUTTONDOWN: {
-        coloridx = (coloridx + 1) % colorn;
         return 0;
     }
     }

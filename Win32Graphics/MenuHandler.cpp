@@ -1,6 +1,8 @@
 #include <Windows.h>
 #include "MenuHandler.h"
 #include "resource.h"
+#include "Win32.h"
+#include "Painter.h"
 namespace MenuHandler {
     MainMenu menu;
 
@@ -56,13 +58,11 @@ namespace MenuHandler {
 
     }
 
-    int colorsIDs[] = { ID_COLORS_RED, ID_COLORS_GREEN, ID_COLORS_BLUE };
-    int circleIDs[] = { ID_OPTIONS_NOCIRCLE, ID_OPTIONS_DRAWCIRCLE, ID_OPTIONS_FILLCIRCLE };
+    int circleIDs[] = { ID_DRAWINGS_NOCIRCLE, ID_DRAWINGS_DRAWCIRCLE, ID_DRAWINGS_FILLCIRCLE };
     MainMenu::MainMenu(HMENU menu) :
-        DrawLine(menu, ID_OPTIONS_DRAWLINE),
+        DrawLine(menu, ID_DRAWINGS_DRAWLINE),
         DrawCircle(menu, circleIDs, sizeof circleIDs / sizeof circleIDs[0]),
-        Colors(menu, colorsIDs, sizeof colorsIDs / sizeof colorsIDs[0]),
-        TrailDraw(menu, ID_OPTIONS_TRAILDRAW)
+        DoubleBuffer(menu, ID_OPTIONS_DOUBLEBUFFER)
     {    }
 
     LPCWSTR getMenuName() {
@@ -76,33 +76,39 @@ namespace MenuHandler {
     {
         return menu;
     }
-    void performMenuAction(HWND hwnd, LPARAM wParam) {
+    Action performMenuAction(HWND hwnd, LPARAM wParam) {
         switch (LOWORD(wParam))
         {
-            case ID_OPTIONS_DRAWLINE: {
+            case ID_DRAWINGS_DRAWLINE: {
                 menu.DrawLine.toggleChecked();
-                return;
+                return Action::NO_ACTION;
             }
-            case ID_OPTIONS_NOCIRCLE:
-            case ID_OPTIONS_DRAWCIRCLE:
-            case ID_OPTIONS_FILLCIRCLE: {
+            case ID_DRAWINGS_NOCIRCLE:
+            case ID_DRAWINGS_DRAWCIRCLE:
+            case ID_DRAWINGS_FILLCIRCLE: {
                 menu.DrawCircle.setChecked(LOWORD(wParam));
-                return;
+                return Action::NO_ACTION;
             }
-            case ID_OPTIONS_TRAILDRAW: {
-                menu.TrailDraw.toggleChecked();
-                return;
+            case ID_OPTIONS_DOUBLEBUFFER: {
+                menu.DoubleBuffer.toggleChecked();
+                return Action::NO_ACTION;
             }
             case ID_OPTIONS_CLEARSCREEN: {
                 InvalidateRect(hwnd, NULL, true);
-                return;
+                return Action::CLEAR_SCREEN;
             }
-            case ID_COLORS_RED:
-            case ID_COLORS_BLUE:
-            case ID_COLORS_GREEN:
-            {
-                menu.Colors.setChecked(LOWORD(wParam));
-                return;
+            case ID_COLORS_FOREGROUND: {
+                Win32::showColorDialog(hwnd, Painter::getInstance().forecolor);
+                InvalidateRect(hwnd, NULL, true);
+                return Action::NO_ACTION;
+            }
+            case ID_COLORS_BACKGROUND: {
+                Win32::showColorDialog(hwnd, Painter::getInstance().backcolor);
+                InvalidateRect(hwnd, NULL, true);
+                return Action::NO_ACTION;
+            }
+            default: {
+                return Action::NO_ACTION;
             }
         }
 

@@ -1,8 +1,13 @@
 #pragma once
 #include <Windows.h>
 namespace MenuHandler {
+    enum class Action {
+        CLEAR_SCREEN,
+        NO_ACTION
+    };
+
     LPCWSTR getMenuName();
-    void performMenuAction(HWND hwnd, LPARAM);
+    Action performMenuAction(HWND hwnd, LPARAM);
     void initializeMenu(HWND);
 
     class CheckMenu {
@@ -22,7 +27,6 @@ namespace MenuHandler {
     class GroupMenu {
     private:
         CheckMenu* choices;
-        HMENU hlp;
         int nCnt;
     public:
         GroupMenu();
@@ -35,8 +39,7 @@ namespace MenuHandler {
     public:
         CheckMenu DrawLine;
         GroupMenu DrawCircle;
-        GroupMenu Colors;
-        CheckMenu TrailDraw;
+        CheckMenu DoubleBuffer;
         MainMenu();
         MainMenu(HMENU menu);
     };

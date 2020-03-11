@@ -52,23 +52,25 @@ END
 
 IDR_MENU1 MENU
 BEGIN
+    POPUP "Drawings"
+    BEGIN
+        MENUITEM "No Circle",                   ID_DRAWINGS_NOCIRCLE
+        MENUITEM "Draw Circle",                 ID_DRAWINGS_DRAWCIRCLE, CHECKED
+        MENUITEM "Fill Circle",                 ID_DRAWINGS_FILLCIRCLE, INACTIVE
+        MENUITEM SEPARATOR
+        MENUITEM "Draw Line",                   ID_DRAWINGS_DRAWLINE, CHECKED
+    END
     POPUP "Options"
     BEGIN
-        MENUITEM "No Circle",                   ID_OPTIONS_NOCIRCLE
-        MENUITEM "Draw Circle",                 ID_OPTIONS_DRAWCIRCLE, CHECKED
-        MENUITEM "Fill Circle",                 ID_OPTIONS_FILLCIRCLE
-        MENUITEM SEPARATOR
-        MENUITEM "Draw Line",                   ID_OPTIONS_DRAWLINE, CHECKED
-        MENUITEM SEPARATOR
-        MENUITEM "Trail Draw",                  ID_OPTIONS_TRAILDRAW
+        MENUITEM "Double Buffer",               ID_OPTIONS_DOUBLEBUFFER, CHECKED
         POPUP "Colors"
         BEGIN
-            MENUITEM "Red",                         ID_COLORS_RED, CHECKED
-            MENUITEM "Green",                       ID_COLORS_GREEN
-            MENUITEM "Blue",                        ID_COLORS_BLUE
+            MENUITEM "Foreground...",               ID_COLORS_FOREGROUND
+            MENUITEM "Background...",               ID_COLORS_BACKGROUND
         END
         MENUITEM SEPARATOR
         MENUITEM "Clear Screen",                ID_OPTIONS_CLEARSCREEN
+        MENUITEM SEPARATOR
     END
 END
 

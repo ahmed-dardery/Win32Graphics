@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <math.h>
 
 #define ROUND(v) int(v + (v>0?0.5:-0.5))
 
