@@ -2,34 +2,51 @@
 #include <cmath>
 #include <algorithm>
 
+void SetMultiPixel(HDC hdc, int xc, int yc, COLORREF color, int x, int y) {
+    SetPixel(hdc, xc + x, yc + y, color);
+    SetPixel(hdc, xc - x, yc + y, color);
+    SetPixel(hdc, xc + x, yc - y, color);
+    SetPixel(hdc, xc - x, yc - y, color);
+
+    SetPixel(hdc, xc + y, yc + x, color);
+    SetPixel(hdc, xc - y, yc + x, color);
+    SetPixel(hdc, xc + y, yc - x, color);
+    SetPixel(hdc, xc - y, yc - x, color);
+}
+
 void DrawCircle(HDC hdc, int xc, int yc, int R, COLORREF color) {
+    int x = R;
+    int y = 0;
+    SetMultiPixel(hdc,xc,yc,color,x, y);
+    int d = 5 - 4 * R;
+    while (x > y)
+    {
+        if (d > 0) {
+            d += -8 * x + 8;
+            x--;
+        }
+        d += 8 * y + 12;
+        y++;
+
+        SetMultiPixel(hdc, xc, yc, color, x,y);
+    }
+}
+
+void DrawCircleDeprecated(HDC hdc, int xc, int yc, int R, COLORREF color) {
     const double dtheta = 1.0 / R;
     const double sin_dtheta = sin(dtheta);
     const double cos_dtheta = cos(dtheta);
-    const double M_PI = acos(-1.0);
-
-    const auto SetMultiPixel = [hdc, xc, yc, color](int x, int y) {
-        SetPixel(hdc, xc + x, yc + y, color);
-        SetPixel(hdc, xc - x, yc + y, color);
-        SetPixel(hdc, xc + x, yc - y, color);
-        SetPixel(hdc, xc - x, yc - y, color);
-
-        SetPixel(hdc, xc + y, yc + x, color);
-        SetPixel(hdc, xc - y, yc + x, color);
-        SetPixel(hdc, xc + y, yc - x, color);
-        SetPixel(hdc, xc - y, yc - x, color);
-    };
 
     double x = R;
     double y = 0;
-    SetMultiPixel(x, y);
+    SetMultiPixel(hdc, xc, yc, color, x, y);
 
     while (x > y)
     {
         double xnew = x * cos_dtheta - y * sin_dtheta;
         double ynew = x * sin_dtheta + y * cos_dtheta;
 
-        SetMultiPixel(ROUND(x), ROUND(y));
+        SetMultiPixel(hdc, xc, yc, color, ROUND(xnew), ROUND(ynew));
 
         x = xnew;
         y = ynew;
@@ -37,37 +54,7 @@ void DrawCircle(HDC hdc, int xc, int yc, int R, COLORREF color) {
 }
 
 void FillCircle(HDC hdc, int xc, int yc, int R, COLORREF color) {
-    const double dtheta = 1.0 / R;
-    const double sin_dtheta = sin(dtheta);
-    const double cos_dtheta = cos(dtheta);
-    const double M_PI = acos(-1.0);
-
-    const auto SetMultiPixel = [hdc, xc, yc, color](int x, int y) {
-        DrawLine(hdc, xc, yc, xc + x, yc + y, color);
-        DrawLine(hdc, xc, yc, xc - x, yc + y, color);
-        DrawLine(hdc, xc, yc, xc + x, yc - y, color);
-        DrawLine(hdc, xc, yc, xc - x, yc - y, color);
-
-        DrawLine(hdc, xc, yc, xc + y, yc + x, color);
-        DrawLine(hdc, xc, yc, xc - y, yc + x, color);
-        DrawLine(hdc, xc, yc, xc + y, yc - x, color);
-        DrawLine(hdc, xc, yc, xc - y, yc - x, color);
-    };
-
-    double x = R;
-    double y = 0;
-    SetMultiPixel(x, y);
-
-    while (x > y)
-    {
-        double xnew = x * cos_dtheta - y * sin_dtheta;
-        double ynew = x * sin_dtheta + y * cos_dtheta;
-
-        SetMultiPixel(ROUND(x), ROUND(y));
-
-        x = xnew;
-        y = ynew;
-    }
+    //TO BE IMPLEMENTED
 }
 
 void DrawLine(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
