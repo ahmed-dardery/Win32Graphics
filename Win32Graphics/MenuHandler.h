@@ -37,7 +37,7 @@ namespace MenuHandler {
 
     class MainMenu {
     public:
-        CheckMenu DrawLine;
+        GroupMenu DrawLine;
         GroupMenu DrawCircle;
         CheckMenu DoubleBuffer;
         MainMenu();

@@ -59,6 +59,7 @@ BEGIN
         MENUITEM "Fill Circle",                 ID_DRAWINGS_FILLCIRCLE, INACTIVE
         MENUITEM SEPARATOR
         MENUITEM "Draw Line",                   ID_DRAWINGS_DRAWLINE, CHECKED
+        MENUITEM "Draw Bezier",                 ID_DRAWINGS_DRAWBEZIER
     END
     POPUP "Options"
     BEGIN
@@ -70,7 +71,6 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Clear Screen",                ID_OPTIONS_CLEARSCREEN
-        MENUITEM SEPARATOR
     END
 END
 

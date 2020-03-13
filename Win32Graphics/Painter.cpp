@@ -10,14 +10,13 @@ void Painter::ClearAll(PAINTSTRUCT& ps, HDC hdc) {
 }
 void Painter::PaintProcedure(HDC hdc) {
     if (lineSet) {
-        if (MenuHandler::Menu().DrawLine.isChecked()) {
-            if (drawLegEnd && drawLegStart)
-                drawCubic(hdc, xst, yst, 3*(xst-xstleg), 3*(yst-ystleg), xen, yen, -3*(xen-xenleg), -3*(yen-yenleg), forecolor);
-            else
-                DrawLine(hdc, xst, yst, xen, yen, forecolor);
+        if (MenuHandler::Menu().DrawLine.getCheckedIndex()==0) 
+            DrawLine(hdc, xst, yst, xen, yen, forecolor); 
+        else{
+            DrawBezier(hdc, xst, yst, 3*(xst-xstleg), 3*(yst-ystleg), xen, yen, -3*(xen-xenleg), -3*(yen-yenleg), forecolor);
 
-            if (drawLegStart) DrawLine(hdc, xst, yst, xstleg, ystleg, forecolor);
-            if (drawLegEnd) DrawLine(hdc, xen, yen, xenleg, yenleg, forecolor);
+            DrawLine(hdc, xst, yst, xstleg, ystleg, forecolor);
+            DrawLine(hdc, xen, yen, xenleg, yenleg, forecolor);
         }
         int circleType = MenuHandler::Menu().DrawCircle.getCheckedIndex();
         if (circleType == 1) {
@@ -44,9 +43,9 @@ void Painter::announceClicked(int x, int y)
     current = (mode)selectedPoint;
 
     if (selectedPoint == 0) {
-        xst = x;
-        yst = y;
-        drawLegStart = drawLegEnd = lineSet = 0;
+        xstleg= xst = x;
+        ystleg= yst = y;
+        lineSet = 0;
     }
 
 
@@ -54,18 +53,16 @@ void Painter::announceClicked(int x, int y)
 
 void Painter::announceDragged(int x, int y) {
     if (current == mode::DRAGSTART) {
-        drawLegStart = 1;
         xstleg = x;
         ystleg = y;
     }
     else if (current == mode::DRAGEND) {
-        drawLegEnd = 1;
         xenleg = x;
         yenleg = y;
     }
     else {
-        xen = x;
-        yen = y;
+        xenleg = xen = x;
+        yenleg = yen = y;
         lineSet = 1;
     }
 

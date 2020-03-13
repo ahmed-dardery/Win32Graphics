@@ -126,7 +126,7 @@ void DrawLineDouble(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
     }
 }
 
-void drawCubic(HDC hdc, int x1, int y1, int u1, int v1, int x2, int y2, int u2, int v2,COLORREF color) {
+void DrawBezier(HDC hdc, int x1, int y1, int u1, int v1, int x2, int y2, int u2, int v2,COLORREF color) {
     int a0 = x1;
     int a1 = u1;
     int a2 = -3 * x1 - 2 * u1 + 3 * x2 - u2;
@@ -137,16 +137,12 @@ void drawCubic(HDC hdc, int x1, int y1, int u1, int v1, int x2, int y2, int u2, 
     int b2 = -3 * y1 - 2 * v1 + 3 * y2 - v2;
     int b3 = 2 * y1 + v1 - 2 * y2 + v2;
 
-    int x = a0;
-    int y = b0;
-    SetPixel(hdc, x, y, color);
-
     double dt = 0.0001;
-    for (double t = dt; t <= 1; t += dt)
+    for (double t = 0; t <= 1; t += dt)
     {
         int x = a0 + a1 * t + a2 * t * t + a3 * t * t * t;
         int y = b0 + b1 * t + b2 * t * t + b3 * t * t * t;
        
-        SetPixel(hdc, x, y, color);
+        SetPixel(hdc, ROUND(x), ROUND(y), color);
     }
 }

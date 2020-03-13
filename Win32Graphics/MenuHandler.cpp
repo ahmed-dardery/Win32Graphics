@@ -59,8 +59,9 @@ namespace MenuHandler {
     }
 
     int circleIDs[] = { ID_DRAWINGS_NOCIRCLE, ID_DRAWINGS_DRAWCIRCLE, ID_DRAWINGS_FILLCIRCLE };
+    int lineIDs[] = { ID_DRAWINGS_DRAWLINE, ID_DRAWINGS_DRAWBEZIER };
     MainMenu::MainMenu(HMENU menu) :
-        DrawLine(menu, ID_DRAWINGS_DRAWLINE),
+        DrawLine(menu, lineIDs, sizeof lineIDs/ sizeof lineIDs[0]),
         DrawCircle(menu, circleIDs, sizeof circleIDs / sizeof circleIDs[0]),
         DoubleBuffer(menu, ID_OPTIONS_DOUBLEBUFFER)
     {    }
@@ -79,8 +80,9 @@ namespace MenuHandler {
     Action performMenuAction(HWND hwnd, LPARAM wParam) {
         switch (LOWORD(wParam))
         {
-            case ID_DRAWINGS_DRAWLINE: {
-                menu.DrawLine.toggleChecked();
+            case ID_DRAWINGS_DRAWLINE:
+            case ID_DRAWINGS_DRAWBEZIER: {
+                menu.DrawLine.setChecked(LOWORD(wParam));
                 return Action::NO_ACTION;
             }
             case ID_DRAWINGS_NOCIRCLE:
