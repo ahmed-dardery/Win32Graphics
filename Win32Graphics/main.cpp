@@ -118,18 +118,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     }
     case WM_MOUSEMOVE: {
         if (isClicked) {
-            painter.xen = LOWORD(lParam);
-            painter.yen = HIWORD(lParam);
-            painter.lineSet = 1;
+            painter.announceDragged(LOWORD(lParam), HIWORD(lParam));
             InvalidateRect(hwnd, NULL, true);
         }
         return 0;
     }
     case WM_LBUTTONDOWN: {
         isClicked = 1;
-        painter.xen = painter.xst = LOWORD(lParam);
-        painter.yen = painter.yst = HIWORD(lParam);
-        painter.lineSet = 1;
+        painter.announceClicked(LOWORD(lParam), HIWORD(lParam));
+
         InvalidateRect(hwnd, NULL, true);
         return 0;
     }
