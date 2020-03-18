@@ -29,7 +29,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow
     wc.lpszMenuName = MenuHandler::getMenuName();
     if (!RegisterClass(&wc))
         return 0;
-
+    
     // Create the window.
 
     //for options check

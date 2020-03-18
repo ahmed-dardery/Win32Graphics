@@ -13,7 +13,9 @@ void Painter::PaintProcedure(HDC hdc) {
         if (MenuHandler::Menu().DrawLine.getCheckedIndex()==0) 
             DrawLine(hdc, xst, yst, xen, yen, forecolor); 
         else{
-            DrawBezier(hdc, xst, yst, 3*(xst-xstleg), 3*(yst-ystleg), xen, yen, -3*(xen-xenleg), -3*(yen-yenleg), forecolor);
+            DrawBezier(hdc, xst, yst, 4*(xst-xstleg), 4*(yst-ystleg), xen, yen, -4*(xen-xenleg), -4*(yen-yenleg), forecolor);
+            DrawCircle(hdc, xst, yst, 7, forecolor);
+            DrawCircle(hdc, xen, yen, 7, forecolor);
 
             DrawLine(hdc, xst, yst, xstleg, ystleg, forecolor);
             DrawLine(hdc, xen, yen, xenleg, yenleg, forecolor);

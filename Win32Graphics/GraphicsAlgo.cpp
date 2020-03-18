@@ -72,7 +72,10 @@ void DrawLine(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
         int dir = -dx * diff;
         while (x < xe) {
             ++x;
-            if (d * dir < 0) y += diff, d -= 2 * dx * diff;
+            if (d * dir < 0) {
+                y += diff, d -= 2 * dx * diff;
+                //SetPixel(hdc, x-1, y, color);
+            }
             d += 2 * dy;
             SetPixel(hdc, x, y, color);
         }
@@ -89,7 +92,10 @@ void DrawLine(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
         int dir = dy * diff;
 
         while (y < ye) {
-            if (d * dir < 0) x += diff, d += 2 * dy * diff;
+            if (d * dir < 0) {
+                x += diff, d += 2 * dy * diff;
+                //SetPixel(hdc, x, y-1, color);
+            }
             ++y;
             d -= 2 * dx;
             SetPixel(hdc, x, y, color);
@@ -126,7 +132,7 @@ void DrawLineDouble(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
     }
 }
 
-void DrawBezier(HDC hdc, int x1, int y1, int u1, int v1, int x2, int y2, int u2, int v2,COLORREF color) {
+void DrawBezier(HDC hdc, int x1, int y1, int u1, int v1, int x2, int y2, int u2, int v2, COLORREF color) {
     int a0 = x1;
     int a1 = u1;
     int a2 = -3 * x1 - 2 * u1 + 3 * x2 - u2;
