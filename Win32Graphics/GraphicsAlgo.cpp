@@ -1,6 +1,9 @@
 #include "GraphicsAlgo.h"
 #include <cmath>
 #include <algorithm>
+#include "Win32.h"
+
+#define SetPixel Win32::SetPixelFast
 
 void SetMultiPixel(HDC hdc, int xc, int yc, COLORREF color, int x, int y) {
     SetPixel(hdc, xc + x, yc + y, color);
@@ -54,7 +57,14 @@ void DrawCircleDeprecated(HDC hdc, int xc, int yc, int R, COLORREF color) {
 }
 
 void FillCircle(HDC hdc, int xc, int yc, int R, COLORREF color) {
-    //TO BE IMPLEMENTED
+    for (int x = -R; x < +R; x++)
+    {
+        for (int y = -R; y < +R; y++)
+        {
+            if (x * x + y * y < R * R)
+            SetPixel(hdc, x+xc, y+yc, color);
+        }
+    }
 }
 
 void DrawLine(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
@@ -131,24 +141,50 @@ void DrawLineDouble(HDC hdc, int xs, int ys, int xe, int ye, COLORREF color) {
         }
     }
 }
-
-void DrawBezier(HDC hdc, int x1, int y1, int u1, int v1, int x2, int y2, int u2, int v2, COLORREF color) {
+/*
+void DrawBezier(HDC hdc, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, COLORREF color) {
+    x2 = 3 * (x2 - x1);
+    y2 = 3 * (y2 - y1);
+    x3 = 3 * (x4 - x3);
+    y3 = 3 * (y4 - y3);
     int a0 = x1;
-    int a1 = u1;
-    int a2 = -3 * x1 - 2 * u1 + 3 * x2 - u2;
-    int a3 = 2 * x1 + u1 - 2 * x2 + u2;
+    int a1 = x2;
+    int a2 = -3 * x1 - 2 * x2 + 3 * x4 - x3;
+    int a3 = 2 * x1 + x2 - 2 * x4 + x3;
 
     int b0 = y1;
-    int b1 = v1;
-    int b2 = -3 * y1 - 2 * v1 + 3 * y2 - v2;
-    int b3 = 2 * y1 + v1 - 2 * y2 + v2;
+    int b1 = y2;
+    int b2 = -3 * y1 - 2 * y2 + 3 * y4 - y3;
+    int b3 = 2 * y1 + y2 - 2 * y4 + y3;
 
-    double dt = 0.0001;
+    double dt = 0.0005;
     for (double t = 0; t <= 1; t += dt)
     {
         int x = a0 + a1 * t + a2 * t * t + a3 * t * t * t;
         int y = b0 + b1 * t + b2 * t * t + b3 * t * t * t;
        
+        SetPixel(hdc, ROUND(x), ROUND(y), color);
+    }
+}*/
+
+void DrawBezier(HDC hdc, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, COLORREF color) {
+    
+    int a3 = -x1 + 3 * x2 - 3 * x3 + x4;
+    int a2 = 3 * x1 - 6 * x2 + 3 * x3;
+    int a1 = -3 * x1 + 3 * x2;
+    int a0 = x1;
+
+    int b3 = -y1 + 3 * y2 - 3 * y3 + y4;
+    int b2 = 3 * y1 - 6 * y2 + 3 * y3;
+    int b1 = -3 * y1 + 3 * y2;
+    int b0 = y1;
+
+    double dt = 0.0005;
+    for (double t = 0; t <= 1; t += dt)
+    {
+        int x = a0 + a1 * t + a2 * t * t + a3 * t * t * t;
+        int y = b0 + b1 * t + b2 * t * t + b3 * t * t * t;
+
         SetPixel(hdc, ROUND(x), ROUND(y), color);
     }
 }

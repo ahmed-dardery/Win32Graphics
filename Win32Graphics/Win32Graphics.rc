@@ -56,7 +56,7 @@ BEGIN
     BEGIN
         MENUITEM "No Circle",                   ID_DRAWINGS_NOCIRCLE, CHECKED
         MENUITEM "Draw Circle",                 ID_DRAWINGS_DRAWCIRCLE
-        MENUITEM "Fill Circle",                 ID_DRAWINGS_FILLCIRCLE, INACTIVE
+        MENUITEM "Fill Circle",                 ID_DRAWINGS_FILLCIRCLE
         MENUITEM SEPARATOR
         MENUITEM "Draw Line",                   ID_DRAWINGS_DRAWLINE, CHECKED
         MENUITEM "Draw Bezier",                 ID_DRAWINGS_DRAWBEZIER

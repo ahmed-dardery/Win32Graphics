@@ -27,7 +27,7 @@ public:
 	mode current;
 
 	void ClearAll(PAINTSTRUCT& ps, HDC hdc);
-	void PaintProcedure(HDC hdc);
+	void PaintProcedure(HWND hwnd, HDC hdc);
 
 	void announceClicked(int x, int y);
 	void announceDragged(int x, int y);

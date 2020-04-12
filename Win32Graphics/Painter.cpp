@@ -1,6 +1,8 @@
 #include "Painter.h"
 #include "MenuHandler.h"
 #include "GraphicsAlgo.h"
+#include "Win32.h"
+
 Painter::Painter() {
 }
 Painter::Painter(const Painter& rhs) {
@@ -8,14 +10,19 @@ Painter::Painter(const Painter& rhs) {
 void Painter::ClearAll(PAINTSTRUCT& ps, HDC hdc) {
     FillRect(hdc, &ps.rcPaint, CreateSolidBrush(backcolor));
 }
-void Painter::PaintProcedure(HDC hdc) {
+void Painter::PaintProcedure(HWND hwnd, HDC hdc) {
+    Win32::StartFastPixel(hwnd, hdc);
+
     if (lineSet) {
         if (MenuHandler::Menu().DrawLine.getCheckedIndex()==0) 
             DrawLine(hdc, xst, yst, xen, yen, forecolor); 
         else{
-            DrawBezier(hdc, xst, yst, 4*(xst-xstleg), 4*(yst-ystleg), xen, yen, -4*(xen-xenleg), -4*(yen-yenleg), forecolor);
-            DrawCircle(hdc, xst, yst, 7, forecolor);
-            DrawCircle(hdc, xen, yen, 7, forecolor);
+            DrawBezier(hdc, xst, yst, xstleg, ystleg, xenleg, yenleg, xen, yen, forecolor);
+            //DrawCircle(hdc, xst, yst, 7, forecolor);
+            //DrawCircle(hdc, xen, yen, 7, forecolor);
+
+            DrawCircle(hdc, xstleg, ystleg, 7, forecolor);
+            DrawCircle(hdc, xenleg, yenleg, 7, forecolor);
 
             DrawLine(hdc, xst, yst, xstleg, ystleg, forecolor);
             DrawLine(hdc, xen, yen, xenleg, yenleg, forecolor);
@@ -31,15 +38,17 @@ void Painter::PaintProcedure(HDC hdc) {
         }
 
     }
+
+    Win32::EndFastPixel(hdc);
 }
 
 void Painter::announceClicked(int x, int y)
 {
     int selectedPoint = 0;
     if (lineSet) {
-        if (abs(x - xst) < 8 && abs(y - yst) < 8)
+        if (abs(x - xstleg) < 8 && abs(y - ystleg) < 8)
             selectedPoint = 1;
-        else if (abs(x - xen) < 8 && abs(y - yen) < 8)
+        else if (abs(x - xenleg) < 8 && abs(y - yenleg) < 8)
             selectedPoint = 2;
     }
     current = (mode)selectedPoint;

@@ -4,9 +4,9 @@
 #include "GraphicsAlgo.h"
 #include "MenuHandler.h"
 #include "Painter.h"
+#include "Win32.h"
 
 Painter &painter = Painter::getInstance();
-bool isClicked;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -24,7 +24,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow
     wc.lpfnWndProc = WndProc;     //pointer to windows procedure function
     wc.hInstance = hInstance;    //handle to instance
     wc.lpszClassName = CLASS_NAME;  //pointer to string class name
-    wc.hbrBackground = NULL;
+    wc.hbrBackground = NULL; //CreateSolidBrush(RGB(255, 255, 255));
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.lpszMenuName = MenuHandler::getMenuName();
     if (!RegisterClass(&wc))
@@ -82,59 +82,35 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     }
     case WM_PAINT: {
         bool doubleBuffer = MenuHandler::Menu().DoubleBuffer.isChecked();
-        HDC hdc = nullptr, Orghdc = nullptr;
+        HDC hdc = nullptr;
         PAINTSTRUCT ps;
-        int win_width = 0, win_height = 0; 
-        HBITMAP Membitmap = nullptr;
 
-        if (doubleBuffer) {
-            RECT Client_Rect;
-            GetClientRect(hwnd, &Client_Rect);
-            win_width = Client_Rect.right - Client_Rect.left;
-            win_height = Client_Rect.bottom + Client_Rect.left;
-            Orghdc = BeginPaint(hwnd, &ps);
-            hdc = CreateCompatibleDC(Orghdc);
-            Membitmap = CreateCompatibleBitmap(Orghdc, win_width, win_height);
-            SelectObject(hdc, Membitmap);
-        }
-        else {
+        if (doubleBuffer)
+            hdc = Win32::BeginDoubleBufferPaint(hwnd, &ps);
+        else 
             hdc = BeginPaint(hwnd, &ps);
-        }
       
         painter.ClearAll(ps, hdc);
-        painter.PaintProcedure(hdc);
+        painter.PaintProcedure(hwnd, hdc);
 
-        if (doubleBuffer) {
-
-            BitBlt(Orghdc, 0, 0, win_width, win_height, hdc, 0, 0, SRCCOPY);
-            DeleteObject(Membitmap);
-            DeleteDC(Orghdc);
-        }
-
-        DeleteDC(hdc);
-        EndPaint(hwnd, &ps);
+        if (doubleBuffer)
+            Win32::EndDoubleBufferPaint(hwnd, &ps);
+        else
+            EndPaint(hwnd, &ps);
 
         return 0;
     }
     case WM_MOUSEMOVE: {
-        if (isClicked) {
+        if (wParam & MK_LBUTTON) {
             painter.announceDragged(LOWORD(lParam), HIWORD(lParam));
             InvalidateRect(hwnd, NULL, true);
         }
         return 0;
     }
     case WM_LBUTTONDOWN: {
-        isClicked = 1;
         painter.announceClicked(LOWORD(lParam), HIWORD(lParam));
 
         InvalidateRect(hwnd, NULL, true);
-        return 0;
-    }
-    case WM_LBUTTONUP: {
-        isClicked = 0;
-        return 0;
-    }
-    case WM_RBUTTONDOWN: {
         return 0;
     }
     }
