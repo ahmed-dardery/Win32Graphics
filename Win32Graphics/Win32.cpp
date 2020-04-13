@@ -80,6 +80,14 @@ void Win32::SetPixelFast(HDC hdc, int x, int y, COLORREF color)
     bmp[y * lastWidth + x] = c;
 }
 
+COLORREF Win32::GetPixelFast(HDC hdc, int x, int y)
+{
+    if (x < 0 || y < 0 || x >= lastWidth || y >= lastHeight) return 0xFFFFFFFF;
+
+    COLORREF color = bmp[y * lastWidth + x];
+    return RGB(GetBValue(color), GetGValue(color), GetRValue(color));
+}
+
 void Win32::EndFastPixel(HDC hdc)
 {
     //Copy the buffer into hdc.
