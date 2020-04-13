@@ -179,7 +179,7 @@ void DrawBezier(HDC hdc, int x1, int y1, int x2, int y2, int x3, int y3, int x4,
     int b1 = -3 * y1 + 3 * y2;
     int b0 = y1;
 
-    double dt = 0.0005;
+    double dt = 0.0001;
     for (double t = 0; t <= 1; t += dt)
     {
         int x = a0 + a1 * t + a2 * t * t + a3 * t * t * t;
