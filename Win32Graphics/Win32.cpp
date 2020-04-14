@@ -1,7 +1,5 @@
 #include "Win32.h"
 
- COLORREF *(Win32::bmp) = 0;
-
 bool Win32::showColorDialog(HWND hwnd, COLORREF& ret) {
     CHOOSECOLOR cc = {};                 // common dialog box structure 
     static COLORREF acrCustClr[16]; // array of custom colors 
@@ -19,108 +17,118 @@ bool Win32::showColorDialog(HWND hwnd, COLORREF& ret) {
     return true;
 }
 
-int lastWidth, lastHeight;
-HDC lastHDC;
-BITMAPINFO lastBitInfo = {};
-HBITMAP Membitmap = nullptr;
-#include <stdio.h>
+#pragma region FASTPIXEL
 
-void Win32::StartFastPixel(HWND hwnd, HDC hdc)
+COLORREF* bmp = 0;
+bool fastpixelmode = 0;
+BITMAPINFO bmpInfo = { {sizeof(BITMAPINFOHEADER), 0, 0, 1, 32, BI_RGB} };
+BITMAPINFOHEADER& bmpHeader = bmpInfo.bmiHeader;
+void Win32::StartFastPixel(HDC hdc)
 {
     //Get window dimensions and allocate memory if necessary.
-    RECT rect;
-    GetClientRect(hwnd, &rect);
-    int newWidth = rect.right - rect.left;
-    int newHeight = rect.bottom - rect.top;
-    if (newWidth != lastWidth || newHeight != lastHeight) {
-        lastWidth = newWidth;
-        lastHeight = newHeight;
+    int newWidth, newHeight;
+    getScreenResolution(hdc, newWidth, newHeight);
+
+    if (newWidth != bmpHeader.biWidth || newHeight != -bmpHeader.biHeight) {
+        //screen resized, we need a new buffer size.
+        
+        bmpHeader.biWidth = newWidth;
+        bmpHeader.biHeight = -newHeight;
+        bmpHeader.biSizeImage = newWidth * newHeight;
 
         delete[] bmp;
-        bmp = new COLORREF[(size_t)lastWidth * lastHeight];
+        bmp = new COLORREF[(size_t)newWidth * newHeight];
     }
 
-    //Create a new hdc
-    HDC hCaptureDC = CreateCompatibleDC(hdc);
-    //create a new bitmap
-    HBITMAP hBitmap = CreateCompatibleBitmap(hdc, lastWidth, lastHeight);
-    //link the newly created hdc with the newly created bitmap
-    SelectObject(hCaptureDC, hBitmap);
-    //copy the pixels from the original hdc to the new one
-    BOOL bOK = BitBlt(hCaptureDC, 0, 0, lastWidth, lastHeight, hdc, 0, 0, SRCCOPY);
-    //delete the hdc and bitmap
-    DeleteDC(hCaptureDC);
-
-    //Required options to get pixels in a proper format.
-    BITMAPINFOHEADER& h = lastBitInfo.bmiHeader;
-    h.biSize = sizeof(BITMAPINFOHEADER);
-    h.biWidth = lastWidth;
-    h.biHeight = -lastHeight;
-    h.biPlanes = 1;
-    h.biBitCount = 32;
-    h.biCompression = BI_RGB;
-    h.biSizeImage = lastWidth * lastHeight;
-
+    //the HBITMAP that the inital hdc uses contains the border as well, so we need to clone it without border
+    HDC hdcClone = cloneHDC(hdc);
+    HBITMAP hBitmap = (HBITMAP)GetCurrentObject(hdcClone, OBJ_BITMAP);
+    
     //Get the bitmap buffer
-    GetDIBits(hdc, hBitmap, 0, lastHeight, bmp, &lastBitInfo, DIB_RGB_COLORS);
-
+    GetDIBits(hdcClone, hBitmap, 0, -bmpHeader.biHeight, bmp, &bmpInfo, DIB_RGB_COLORS);
+    
     //Delete the bitmap
     DeleteObject(hBitmap);
+    DeleteDC(hdcClone);
+    fastpixelmode = 1;
 }
 
 void Win32::SetPixelFast(HDC hdc, int x, int y, COLORREF color)
 {
-    if (x < 0 || y < 0 || x >= lastWidth || y >= lastHeight) return;
+    if (!fastpixelmode) {
+        SetPixel(hdc, x, y, color);
+        return;
+    }
+    if (x < 0 || y < 0 || x >= bmpHeader.biWidth || y >= -bmpHeader.biHeight) return;
 
     //for some reason, the format of the bitmap is BGR not RGB, so we need to swap
     //the R component with the B component.
     COLORREF c = RGB(GetBValue(color), GetGValue(color), GetRValue(color));
 
     //Set the pixel directly without API calls.
-    bmp[y * lastWidth + x] = c;
+    bmp[y * bmpHeader.biWidth + x] = c;
 }
 
 COLORREF Win32::GetPixelFast(HDC hdc, int x, int y)
 {
-    if (x < 0 || y < 0 || x >= lastWidth || y >= lastHeight) return 0xFFFFFFFF;
+    
+    if (x < 0 || y < 0 || x >= bmpHeader.biWidth || y >= -bmpHeader.biHeight) return 0xFFFFFFFF;
 
-    COLORREF color = bmp[y * lastWidth + x];
+    COLORREF color = bmp[y * bmpHeader.biWidth + x];
     return RGB(GetBValue(color), GetGValue(color), GetRValue(color));
 }
 
 void Win32::EndFastPixel(HDC hdc)
 {
+    fastpixelmode = 0;
     //Copy the buffer into hdc.
-    SetDIBitsToDevice(hdc, 0, 0, lastWidth, lastHeight, 0, 0, 0, lastHeight, bmp, &lastBitInfo, DIB_RGB_COLORS);
+    SetDIBitsToDevice(hdc, 0, 0, bmpHeader.biWidth, -bmpHeader.biHeight, 0, 0, 0, -bmpHeader.biHeight, bmp, &bmpInfo, DIB_RGB_COLORS);
 }
+
+#pragma endregion
+
+#pragma region DoubleBuffer
 
 HDC hdc = nullptr, Orghdc = nullptr;
 int win_width = 0, win_height = 0; 
 
-//DoubleBuffer is not compatible with hbrBackground in WndClass.
-//If you decide to use double buffer, you must disable it by setting
-//hbrBackground to NULL during the initialization of the window.
-
 HDC Win32::BeginDoubleBufferPaint(HWND hwnd, PAINTSTRUCT* ps) {
-    RECT Client_Rect;
-    GetClientRect(hwnd, &Client_Rect);
-    win_width = Client_Rect.right - Client_Rect.left;
-    win_height = Client_Rect.bottom + Client_Rect.left;
     Orghdc = BeginPaint(hwnd, ps);
-    hdc = CreateCompatibleDC(Orghdc); //create a copy of Orghdc
-    Membitmap = CreateCompatibleBitmap(Orghdc, win_width, win_height); //create a bitmap that fits into hdc
-    
-    SelectObject(hdc, Membitmap); //links hdc with the bitmap
-    BitBlt(hdc, 0, 0, win_width, win_height, Orghdc, 0, 0, SRCCOPY);
-       
+    getScreenResolution(Orghdc, win_width, win_height);
+    hdc = cloneHDC(Orghdc);
     return hdc;
 }
 
 void Win32::EndDoubleBufferPaint(HWND hwnd, PAINTSTRUCT* ps)
 {
     BitBlt(Orghdc, 0, 0, win_width, win_height, hdc, 0, 0, SRCCOPY);
-    DeleteObject(Membitmap);
-    Membitmap = nullptr;
-    DeleteDC(Orghdc);
     DeleteDC(hdc);
+    EndPaint(hwnd, ps);
+    hdc = Orghdc = NULL;
+    win_width = win_height = 0;
+}
+
+#pragma endregion
+
+HDC Win32::cloneHDC(HDC Orghdc) {
+    int width, height;
+    getScreenResolution(Orghdc, width, height);
+
+    HDC hdc = CreateCompatibleDC(Orghdc); //create a copy of Orghdc
+    HBITMAP Membitmap = CreateCompatibleBitmap(Orghdc, width, height); //create a bitmap that fits into hdc
+
+    SelectObject(hdc, Membitmap); //links hdc with the bitmap
+    DeleteObject(Membitmap);
+
+    BitBlt(hdc, 0, 0, width, height, Orghdc, 0, 0, SRCCOPY);
+
+    return hdc;
+}
+
+void Win32::getScreenResolution(HDC hdc, int& width, int& height)
+{
+    RECT rect;
+    GetClipBox(hdc, &rect);
+    width = rect.right - rect.left;
+    height = rect.bottom - rect.top;
 }

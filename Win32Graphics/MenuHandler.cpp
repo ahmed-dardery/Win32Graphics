@@ -96,6 +96,7 @@ namespace MenuHandler {
                 return Action::NO_ACTION;
             }
             case ID_OPTIONS_CLEARSCREEN: {
+                Painter::getInstance().queueClearScreen();
                 InvalidateRect(hwnd, NULL, true);
                 return Action::CLEAR_SCREEN;
             }

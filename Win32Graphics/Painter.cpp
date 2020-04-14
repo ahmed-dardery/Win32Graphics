@@ -3,15 +3,14 @@
 #include "GraphicsAlgo.h"
 #include "Win32.h"
 
-Painter::Painter() {
-}
-Painter::Painter(const Painter& rhs) {
-}
+Painter::Painter() {}
+Painter::Painter(const Painter& rhs) {} 
+
 void Painter::ClearAll(PAINTSTRUCT& ps, HDC hdc) {
     FillRect(hdc, &ps.rcPaint, CreateSolidBrush(backcolor));
 }
 void Painter::PaintProcedure(HWND hwnd, HDC hdc) {
-    Win32::StartFastPixel(hwnd, hdc);
+    Win32::StartFastPixel(hdc);
 
     if (lineSet) {
         if (MenuHandler::Menu().DrawLine.getCheckedIndex()==0) 
@@ -21,8 +20,10 @@ void Painter::PaintProcedure(HWND hwnd, HDC hdc) {
             //DrawCircle(hdc, xst, yst, 7, forecolor);
             //DrawCircle(hdc, xen, yen, 7, forecolor);
 
+
             DrawCircle(hdc, xstleg, ystleg, 7, forecolor);
             DrawCircle(hdc, xenleg, yenleg, 7, forecolor);
+
 
             DrawLine(hdc, xst, yst, xstleg, ystleg, forecolor);
             DrawLine(hdc, xen, yen, xenleg, yenleg, forecolor);
@@ -40,6 +41,11 @@ void Painter::PaintProcedure(HWND hwnd, HDC hdc) {
     }
 
     Win32::EndFastPixel(hdc);
+}
+
+void Painter::commitDrawing(HDC hdc)
+{
+    lastHDC = hdc;
 }
 
 void Painter::announceClicked(int x, int y)
@@ -77,6 +83,11 @@ void Painter::announceDragged(int x, int y) {
         lineSet = 1;
     }
 
+}
+
+void Painter::queueClearScreen()
+{
+    clearScreen = 1;
 }
 
 Painter& Painter::getInstance() {

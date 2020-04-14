@@ -21,14 +21,21 @@ public:
 	bool drawLegStart = 0, drawLegEnd = 0;
 	bool lineSet = 0;
 
+	bool clearScreen = 1;
+	HDC lastHDC = NULL;
+
 	COLORREF forecolor = RGB(0, 0, 0);
 	COLORREF backcolor = RGB(255, 255, 255);
 
-	mode current;
+	mode current = mode::DRAWLINE;
 
 	void ClearAll(PAINTSTRUCT& ps, HDC hdc);
 	void PaintProcedure(HWND hwnd, HDC hdc);
 
+	void commitDrawing(HDC hdc);
+
 	void announceClicked(int x, int y);
 	void announceDragged(int x, int y);
+
+	void queueClearScreen();
 };

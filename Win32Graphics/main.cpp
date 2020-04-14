@@ -90,8 +90,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         else 
             hdc = BeginPaint(hwnd, &ps);
       
-        painter.ClearAll(ps, hdc);
-        painter.PaintProcedure(hwnd, hdc);
+        
+        if (painter.clearScreen) {
+            painter.ClearAll(ps, hdc);
+            painter.clearScreen = 0;
+        }
+        else {
+            painter.ClearAll(ps, hdc);
+            painter.PaintProcedure(hwnd, hdc);
+        }
 
         if (doubleBuffer)
             Win32::EndDoubleBufferPaint(hwnd, &ps);
