@@ -18,5 +18,9 @@ public:
 	static HDC cloneHDC(HDC Orghdc);
 
 	static void getScreenResolution(HDC hdc, int& width, int& height);
+
+	static HWND CreateFunctionalWindow(HINSTANCE hInstance, WNDPROC lpfnWndProc, RECT window, LPCWSTR windowTitle, LPCWSTR menu = NULL);
+
+	static void RunMessageLoop();
 };
 

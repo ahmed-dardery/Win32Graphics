@@ -132,3 +132,57 @@ void Win32::getScreenResolution(HDC hdc, int& width, int& height)
     width = rect.right - rect.left;
     height = rect.bottom - rect.top;
 }
+
+
+HWND Win32::CreateFunctionalWindow(HINSTANCE hInstance, WNDPROC lpfnWndProc, RECT window, LPCWSTR windowTitle, LPCWSTR menu) {
+    // Register the window class.
+    const wchar_t CLASS_NAME[] = L"Class Name";
+
+    WNDCLASS wc = {};   //initialize everything to null
+
+    wc.lpfnWndProc = lpfnWndProc;     //pointer to windows procedure function
+    wc.hInstance = hInstance;    //handle to instance
+    wc.lpszClassName = CLASS_NAME;  //pointer to string class name
+    wc.hbrBackground = NULL; //CreateSolidBrush(RGB(255, 255, 255));
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wc.lpszMenuName = menu;
+    if (!RegisterClass(&wc))
+        return 0;
+
+    // Create the window.
+
+    //for options check
+    //https://docs.microsoft.com/en-us/previous-versions/ms960010(v=msdn.10)
+    HWND hwnd = CreateWindowEx(
+        0,                           // Optional window styles.
+        CLASS_NAME,                     // Window class
+        windowTitle,             // Window title
+        WS_OVERLAPPEDWINDOW,            // Window style
+
+        //Location (x, y) Size (width, height)
+        CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
+
+        NULL,       // Parent window
+        NULL,       // Menu
+        hInstance,  // Instance handle
+        NULL        // Additional application data
+        );
+
+    //if creation fails for any reason
+    if (hwnd == NULL)
+        return 0;
+
+    ShowWindow(hwnd, 1);
+
+    return hwnd;
+}
+
+void Win32::RunMessageLoop()
+{
+    // Run the message loop.
+    MSG msg = {};
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+}
