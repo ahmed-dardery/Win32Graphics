@@ -17,12 +17,15 @@ bool Win32::showColorDialog(HWND hwnd, COLORREF& ret) {
     return true;
 }
 
+
 #pragma region FASTPIXEL
 
 COLORREF* bmp = 0;
 bool fastpixelmode = 0;
 BITMAPINFO bmpInfo = { {sizeof(BITMAPINFOHEADER), 0, 0, 1, 32, BI_RGB} };
 BITMAPINFOHEADER& bmpHeader = bmpInfo.bmiHeader;
+
+//In fast pixel mode, you are responsible for clearing the screen yourself, I recommend using FillRect(hdc, &ps.rcPaint, CreateSolidBrush(backcolor)); before calling this function.
 void Win32::StartFastPixel(HDC hdc)
 {
     //Get window dimensions and allocate memory if necessary.
