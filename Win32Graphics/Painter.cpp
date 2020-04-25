@@ -12,7 +12,7 @@ void Painter::ClearAll(PAINTSTRUCT& ps, HDC hdc) {
     FillRect(hdc, &ps.rcPaint, CreateSolidBrush(backcolor));
 }
 void Painter::PaintProcedure(HWND hwnd, HDC hdc) {
-    //Win32::StartFastPixel(hdc);
+    Win32::StartFastPixel(hdc);
 
     if (lineSet) {
         if (MenuHandler::Menu().DrawLine.getCheckedIndex()==0) 
@@ -42,12 +42,7 @@ void Painter::PaintProcedure(HWND hwnd, HDC hdc) {
 
     }
 
-    //Win32::EndFastPixel(hdc);
-}
-
-void Painter::commitDrawing(HDC hdc)
-{
-    lastHDC = hdc;
+    Win32::EndFastPixel(hdc);
 }
 
 void Painter::announceClicked(int x, int y)
