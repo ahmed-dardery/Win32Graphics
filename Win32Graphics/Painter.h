@@ -32,8 +32,6 @@ public:
 	void ClearAll(PAINTSTRUCT& ps, HDC hdc);
 	void PaintProcedure(HWND hwnd, HDC hdc);
 
-	void commitDrawing(HDC hdc);
-
 	void announceClicked(int x, int y);
 	void announceDragged(int x, int y);
 
