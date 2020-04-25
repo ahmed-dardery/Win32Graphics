@@ -9,4 +9,4 @@ The MenuHandler requires more work to copy and reuse than I would like, but for 
 ## Supported Shapes
 Currently, the algorithms for drawing a line, a circle, and a bezier curve are supported. A naive implementation of circle filling is also implemented.
 
-![Screenshot of the shapes the app supports](/#Images/shapes.png)
+![Screenshot of the shapes the app supports](https://github.com/ahmed-dardery/Win32Graphics/blob/pdf-readme-test/%23Images/shapes.png)
